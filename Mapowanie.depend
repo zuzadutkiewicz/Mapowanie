@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1452811619 source:c:\users\zuza\gitrepos\mapowanie\main.cpp
+	<iostream>
+	<iostream>
+	<stdio.h>
+	<fstream>
+	<stdlib.h>
+	<string.h>
+
