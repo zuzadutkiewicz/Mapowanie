@@ -1,11 +1,12 @@
 # depslib dependency file v1.0
-1452811619 source:c:\users\zuza\gitrepos\mapowanie\main.cpp
-	<iostream>
+1453018647 source:c:\users\zuza\gitrepos\mapowanie\main.cpp
 	<iostream>
 	<stdio.h>
 	<fstream>
 	<stdlib.h>
 	<string.h>
+	<math.h>
+	<ctime>
 
 1452970340 source:c:\workcpacecodeb\mapowanie\main.cpp
 	<iostream>

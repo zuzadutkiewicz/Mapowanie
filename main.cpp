@@ -1,10 +1,10 @@
 #include <iostream>
-#include <iostream>
 #include <stdio.h>
 #include <fstream>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <ctime>
 
 #define MAX_TAB 99
 
@@ -43,7 +43,11 @@ int main()
     zerujPierwLinia();
     zerujNastLinia();
     zerujPominV();
+    clock_t start=clock();
     ret = variancja(-1);
+    printf("Czas wykonywania: %lu ms\n",((1000*(clock()-start))/CLOCKS_PER_SEC));
+
+
 }
 
 void liczbElemPierwLin()
@@ -123,6 +127,10 @@ int variancja(int glebokosc)
         {
             tab[nrElem].pierwLinia = glebokosc;
             ret = variancja(glebokosc);
+            if (ret == 1)
+            {
+                return 1;
+            }
             tab[nrElem].pierwLinia = -1;
         }
         nrElem++;
@@ -188,8 +196,10 @@ void zerujNastLinia()
 void zerujPominV()
 {
     for(int i = 0; i < liczbaElem; i++)
+    {
         tab[i].pominV = -1;
-    // ostatni element zawsze pomijany poniewaz jest suma wszystkich
+
+    }// ostatni element zawsze pomijany poniewaz jest suma wszystkich
    tab[liczbaElem -1].pominV = 1;
 }
 
