@@ -6,7 +6,7 @@
 #include <math.h>
 #include <ctime>
 
-#define MAX_TAB 99
+#define MAX_TAB 300
 
 using namespace std;
 
@@ -22,6 +22,10 @@ Element tab[MAX_TAB];
 
 int liczbaElem = 0; // liczba wszystkich elementow - obliczana przy wczytywaniu
 int liczbaPierwLinia = 0; // liczba elementow pierwszej linii - obliczana w liczbElemPierwLin
+int idxMaxElem = 0;
+int idxMinElem = 0;
+int poziomOdciecia = -1; // poziom powyzej ktorego nie sa brane liczby do variancji
+                         // -1 oznacza wylaczenie opcji
 void wczytajDaneZPliku(const char * nazwaPliku);
 void wypiszDane();
 
@@ -36,7 +40,7 @@ void liczbElemPierwLin();
 
 int main()
 {
-    int ret = 0;
+
     wczytajDaneZPliku("plik.txt");
     liczbElemPierwLin();
     drukujTablice();
@@ -44,7 +48,7 @@ int main()
     zerujNastLinia();
     zerujPominV();
     clock_t start=clock();
-    ret = variancja(-1);
+    variancja(-1);
     printf("Czas wykonywania: %lu ms\n",((1000*(clock()-start))/CLOCKS_PER_SEC));
 
 
@@ -53,7 +57,10 @@ int main()
 void liczbElemPierwLin()
 {
     liczbaPierwLinia = (-1+sqrt(1+8*liczbaElem))/2;
+    cout << " liczbaPierwszaLinia=" << liczbaPierwLinia;
 }
+
+
 void wczytajDaneZPliku(const char * nazwaPliku)
 {
     fstream plik;
@@ -93,6 +100,13 @@ void wczytajDaneZPliku(const char * nazwaPliku)
             break;
         i++;
     }
+    if(liczPom > MAX_TAB)
+    {
+        cout << "Liczba elementow (" << liczPom <<
+             ") przekracza dozwolona wartosc MAX_TAB (" << MAX_TAB << "}" << endl;
+        cout << " Nalezy zwiekszyc MAX_TAB i zrekompilowac program." << endl;
+        exit(1);
+    }
     liczbaElem = liczPom;
 }
 
@@ -100,16 +114,21 @@ void wczytajDaneZPliku(const char * nazwaPliku)
 int variancja(int glebokosc)
 {
     static unsigned long licznik;
+    static clock_t czas = clock();
     int nrElem = 0;
     int ret = 0;
     glebokosc++;
     if(glebokosc >= liczbaPierwLinia)
     {
         licznik++;
-        if(licznik % 1000000 == 0)
-            cout << "Licznik: " << licznik << endl;
-        if(tab[0].pierwLinia == -1)
-            return 0;
+        if(licznik % 10000000 == 0)
+        {
+            int liczPom = licznik / 1000000;
+            int czasPom = ((1000*(clock()-czas))/CLOCKS_PER_SEC);
+            cout << "Liczba: " << liczPom  << " mln " << "Czas : " << czasPom << " ms" << endl;
+            // czas = clock();
+            drukujVariancje();
+        }
         ret = sprawdz();
         if(ret == 1)
         {
@@ -142,7 +161,10 @@ int sprawdz()
 {
     int tabPom[liczbaPierwLinia];
     int sumaWszy = 0;
-    zerujNastLinia();
+
+    // jezeli pierwszy nie jest w linii zerowej od razu return
+    if(tab[idxMinElem].pierwLinia == -1)
+        return 0;
 
     // suma wszystkich jako najwiêkszy element
     for(int i = 0; i < liczbaElem; i++)
@@ -151,8 +173,10 @@ int sprawdz()
             tabPom[tab[i].pierwLinia] = tab[i].liczba;
             sumaWszy = sumaWszy + tab[i].liczba;
         }
-    if(sumaWszy != tab[liczbaElem-1].liczba)
+    if(sumaWszy != tab[idxMaxElem].liczba) {
         return 0;
+    }
+    zerujNastLinia();
 
     for(int i = liczbaPierwLinia - 1; i >= 1 ; i--)
     {
@@ -195,12 +219,36 @@ void zerujNastLinia()
 
 void zerujPominV()
 {
+    // ustawienie wartosci poczatkowych dla wyszukiwania na element zerowy tablicy
+    int minElemPom = tab[0].liczba;
+    idxMinElem = 0;
+    int maxElemPom = tab[0].liczba;
+    idxMaxElem = 0;
     for(int i = 0; i < liczbaElem; i++)
     {
-        tab[i].pominV = -1;
 
-    }// ostatni element zawsze pomijany poniewaz jest suma wszystkich
-   tab[liczbaElem -1].pominV = 1;
+        // ustawienie poziomu odciecia
+        if(poziomOdciecia != -1 && tab[i].liczba > poziomOdciecia)
+            tab[i].pominV = 1;
+        else
+            tab[i].pominV = -1;
+
+        if(minElemPom > tab[i].liczba)
+        {
+            minElemPom = tab[i].liczba;
+            idxMinElem = i;
+        }
+
+        if(maxElemPom < tab[i].liczba)
+        {
+            maxElemPom = tab[i].liczba;
+            idxMaxElem = i;
+        }
+    }
+    // najwiekszy element zawsze pomijany poniewaz jest suma wszystkich
+    tab[idxMaxElem].pominV = 1;
+
+
 }
 
 
@@ -222,11 +270,11 @@ void drukujVariancje()
     for(int i = 0; i < liczbaPierwLinia; i++)
         cout << tabPom[i] << "("<< tabPom1[i] << ") ";
     cout << endl;
-    cout << "tablica" << endl;
-    for(int i = 0; i < liczbaElem; i++)
-        if ( tab[i].pierwLinia == -1 && tab[i].nastLinia == -1)
-        cout << tab[i].liczba << " ("<< tab[i].pierwLinia << "," << tab[i].nastLinia << ") ";
-    cout << endl;
+//    cout << "tablica" << endl;
+//    for(int i = 0; i < liczbaElem; i++)
+//        if ( tab[i].pierwLinia == -1 && tab[i].nastLinia == -1)
+//            cout << tab[i].liczba << " ("<< tab[i].pierwLinia << "," << tab[i].nastLinia << ") ";
+//    cout << endl;
 }
 
 
