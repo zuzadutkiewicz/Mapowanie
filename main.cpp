@@ -1,16 +1,13 @@
 /*
 Copyright (C) 2016  Zuzanna Dutkiewicz
-
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2
 of the License, or (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -42,7 +39,7 @@ int liczbaPierwLinia = 0; // liczba elementow pierwszej linii - obliczana w licz
 int idxMaxElem = 0;
 int idxMinElem = 0;
 int poziomOdciecia = -1; // poziom powyzej ktorego nie sa brane liczby do variancji
-                         // -1 oznacza wylaczenie opcji
+// -1 oznacza wylaczenie opcji
 void wczytajDaneZPliku(const char * nazwaPliku);
 void wypiszDane();
 
@@ -54,18 +51,31 @@ void zerujPominV();
 void drukujTablice();
 int sprawdz();
 void liczbElemPierwLin();
+int sprawdzLiczPom();
 
 int main()
 {
-
+    int ret = 0;
+    int ret1 = 0;
     wczytajDaneZPliku("plik.txt");
     liczbElemPierwLin();
+    // ret1 = sprawdzLiczPom();
+    // if (ret1 == 0)
+    /*{
+         cout << "Brak rozwiazania! Zla liczba danych." << endl;
+         return 0;
+     }*/
     drukujTablice();
     zerujPierwLinia();
     zerujNastLinia();
     zerujPominV();
     clock_t start=clock();
-    variancja(-1);
+    ret =  variancja(-1);
+    if (ret == 0)
+    {
+        cout<< "Brak rozwiazania."<< endl;
+        return 0;
+    }
     printf("Czas wykonywania: %lu ms\n",((1000*(clock()-start))/CLOCKS_PER_SEC));
 
 
@@ -74,10 +84,20 @@ int main()
 void liczbElemPierwLin()
 {
     liczbaPierwLinia = (-1+sqrt(1+8*liczbaElem))/2;
-    cout << " liczbaPierwszaLinia=" << liczbaPierwLinia;
+    cout << " liczbaPierwszaLinia=" << liczbaPierwLinia << endl;
 }
 
-
+int sprawdzLiczPom()
+{
+    if (liczbaElem == 1 ||liczbaElem == 3 || liczbaElem == 6 || liczbaElem == 10 || liczbaElem == 15 || liczbaElem == 21 || liczbaElem == 28 || liczbaElem == 36 || liczbaElem == 45  || liczbaElem == 55  || liczbaElem == 66 ||liczbaElem == 78 ||liczbaElem == 91 ||liczbaElem == 105 ||liczbaElem == 120)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
 void wczytajDaneZPliku(const char * nazwaPliku)
 {
     fstream plik;
@@ -144,7 +164,7 @@ int variancja(int glebokosc)
             int czasPom = ((1000*(clock()-czas))/CLOCKS_PER_SEC);
             cout << "Liczba: " << liczPom  << " mln " << "Czas : " << czasPom << " ms" << endl;
             // czas = clock();
-            drukujVariancje();
+            //drukujVariancje();
         }
         ret = sprawdz();
         if(ret == 1)
@@ -190,7 +210,8 @@ int sprawdz()
             tabPom[tab[i].pierwLinia] = tab[i].liczba;
             sumaWszy = sumaWszy + tab[i].liczba;
         }
-    if(sumaWszy != tab[idxMaxElem].liczba) {
+    if(sumaWszy != tab[idxMaxElem].liczba)
+    {
         return 0;
     }
     zerujNastLinia();
@@ -218,6 +239,16 @@ int sprawdz()
                 return 0;
         }
     }
+
+    for(int i = 0; i < liczbaElem; i++)
+        if ( tab[i].pierwLinia == -1 && tab[i].nastLinia == -1)
+        {
+
+            cout << " Blad: " << tab[i].liczba << " ("<< tab[i].pierwLinia << "," << tab[i].nastLinia << ") ";
+            cout << endl;
+            return 0;
+        }
+
     return 1;
 
 }
